@@ -14,7 +14,8 @@ TCP 179端口，支持VLSM和CIDR。
 
 ### BGP防环措施
 
-* AS-PATH，AS之间
+* AS_Path，AS之间
+  * BGP路由会记录经过的AS号码，简称AS_Path。如果BGP收到路由的AS_Path中包含自己的AS号码，就认为出现了路由环路，从而丢弃收到的路由。
 * IBGP水平分割
 * (TODO)
 * (TODO)
@@ -64,6 +65,8 @@ AS（Autonomous System），自治系统，是由单一的机构或组织所管�
 
 运行在不同AS之间的BGP路由器建立的邻居关系为EBGP（External BGP）邻居关系。
 
+两个设备在同一个AS：IBGP对等体，不同AS: EBGP对等体。
+
 ### BGP最优路由决策策略
 
 一台路由器有可能学习到多条去往相同目的网络的BGP路由，BGP会在这些路由中选择一条最优的路由。BGP定义了一整套详细的选路规则，使得路由器能够在任何复杂的、冗余的网络环境下，决策出一条最优的路由。
@@ -81,6 +84,89 @@ AS（Autonomous System），自治系统，是由单一的机构或组织所管�
 #### 4.优选AS_PATH最短的路由
 
 当路由器学习到多条到达同一个目的网络的BGP路由时，如果路由的Preferred_Value属性值、Local_Preference属性值都相等，并且这些路由都是学习自其它邻居的，那么AS_PATH最短的路由将被优选。
+
+### TTL防环
+
+数据包中的一个数值，每次到达一台设备时就减去1，直到减到0时丢弃。
+
+### 配置&实验
+
+<img src="image/bgp-experiment.png" width="800">
+
+#### 第一步：给每台设备配置router id
+
+通常用loopback来配置
+```
+int loop 1
+ip add 1.1.1.1 32
+```
+
+#### 第二步：开启BGP，设置这台设备的AS
+```
+bgp 100
+```
+
+#### 第三步：配置BGP对等体，前提条件：两个设备tcp能握手，设置ttl
+```
+(bgp 100)
+peer 2.2.2.2 as 200
+```
+```
+(bgp 200)
+peer 1.1.1.1 as 100
+peer 3.3.3.3 as 300
+```
+确认步骤
+```
+(sysname AR1)
+dis bgp peer (只有状态为Established才是成功建立，其余状态如idle/active/connect均代表有故障)
+ping -a 1.1.1.1 2.2.2.2
+dis ip routing-table 2.2.2.2 (查看相关路由表)
+ip route-static 2.2.2.2 32 10.10.12.2
+
+(AR2)
+ip route-static 1.1.1.1 32 10.10.12.1
+```
+设置ttl步骤
+```
+(AR1)
+bgp 100
+peer 2.2.2.2 connect-interface LoopBack 1
+peer 2.2.2.2 ebgp-max-hop 10
+```
+
+#### 第四步：把IGP路由引入BGP
+
+方法一：network引入路由，人工指定。
+```
+(AR3)
+bgp 300
+network 172.16.1.0 24
+(把172.16.1.0/24放入AR3 bgp路由中，AR2从AR3中学到此路由，然后自动再发给它的邻居AR1)
+```
+
+```
+(AR1)
+bgp 100
+network 192.168.1.0 24
+(撤销命令: undo network 192.168.1.0 24)
+```
+
+方法二：import引入路由
+
+```
+import ospf // 把ospf协议产生的路由全部放入bgp里
+```
+
+```
+(AR3)
+bgp 300
+import-route direct
+
+(AR1)
+bgp 100
+import-route direct
+```
 
 ### 资料来源
 
