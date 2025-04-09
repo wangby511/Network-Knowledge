@@ -62,7 +62,7 @@ RIP 100 （接近淘汰）
 
 距离矢量路由协议一般基于Bellman-Ford算法；链路状态协议基于Dijkstra算法，也叫SPF最短路径优先算法。E.g. OSPF路由协议基于Dijkstra算法，开销算入接口数量。
 
-链路状态路由协议中，每台路由器会给邻居发送LSA（Link State Advertisement, 链路状态通告），每个路由器有哪些接口，每个接口地址及哪些邻居。
+链路状态路由协议中，每台路由器会给邻居发送LSA（Link State Advertisement, 链路状态通告），每个路由器有哪些接口，每个接口地址及哪些邻居。路由器将接收到的LSA放入自己的LSDB（Link State DataBase, 链路状态数据库），通过对LSDB中所存储的LSA进行解析，进而了解全网拓扑。路由器使用SPF（Shortest Path First, 最短路径优先）算法进行计算。“树”型结构，防止环路。最后每台路由器生成路由表。
 
 #### 按工作区域分类
 
