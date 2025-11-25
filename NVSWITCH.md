@@ -20,3 +20,10 @@ SXM适合百亿，千亿级别的大模型训练和大数据分析，这些场�
 
 PCI-e适合工作负载较小的场景，比如深度学习的小模型训练。
 
+每个GPU和每个NVSwitch有一条NVLink通道。
+
+<img src="image/nvswitch.png" width="800">
+
+## 来源
+
+[1] [GPU互联革命史】PCIe到NVLink，再到NVSwitch的成长故事——看GPU如何推动AI与高性能计算！](https://www.bilibili.com/video/BV193BBYYEaG)
