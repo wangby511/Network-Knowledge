@@ -71,11 +71,44 @@ The OSFP interfaces of the NVSwitch chips in the DGX system are used for Nvidia�
 
 NVLink Switch System: Allows connection of up to 256 H100 GPUs, offering 900 GB/s bandwidth for multi-GPU IO.
 
-| System   | GPU Model | GPUs per System | NVSwitch Version | Bandwidth per GPU |   NVLink Version  |
-|----------|-----------|-----------------|------------------|-------------------|-------------------|
-| DGX-2    | V100      | 16              | NVSwitch 1.0     | 300 GB/s          |     NVLink 2.0    |
-| DGX A100 | A100      | 8               | NVSwitch 2.0     | 600 GB/s          |     NVLink 3.0    |
-| DGX H100 | H100      | 8               | NVSwitch 3.0     | 900 GB/s          |     NVLink 4.0    |
+### Blackwell & NVLINK 5.0 (2024)
+
+`NVIDIA NVLink 5.0` is the fifth generation of Nvidia's high-speed GPU interconnect, crucial for scaling AI and HPC, doubling bandwidth to 1.8 TB/s per GPU by doubling per-link speed to 100GB/s, enabling massive models like those in the GB200 system with 72 GPUs acting as a single unit. It uses 18 links per GPU and NVSwitch chips for full connectivity, allowing rapid data exchange for trillion-parameter models.
+
+In 2024, Nvidia introduced the Blackwell architecture with the `B200 GPU`, featuring NVLink 5.0 and NVSwitch 4.0 versions, respectively. The per-link unidirectional bandwidth doubled to 50GB/s, with 18 links, resulting in a total bidirectional interconnect bandwidth of 1.8TB/s. Each NVSwitch chip has 72 NVLink 5.0 ports, and each GPU uses 9 NVLink connections to two NVSwitch chips.
+
+The HGX B200 contains 8 x B200 Tensor Core GPUs on a single high-performance baseboard. Each B200 GPU features 18 NVLink 5.0 links. The total bandwidth per GPU is 100 GB/s (bidirectional) * 18 = 1.8 TB/s. Across all 8 GPUs, there are 144 NVLink 5.0 links in total.
+
+Note: 为了让技术规格与 NVLink 5.0 协议对齐，NVIDIA 在 Blackwell 世代（B200/GB200）中将交换芯片正式命名为 NVSwitch 5.0.
+* NVLink 版本： 5.0（单 GPU 双向带宽 1.8 TB/s）。
+* NVSwitch 版本： 5.0（单芯片具备 72 个 NVLink 端口，总带宽达到 14.4 TB/s）。
+* 每个B200 GPU 有 18 条 NVLinks 5.0，而基板上只有 2 个 NVSwitch 5.0 芯片，所以每个GPU会连 9 个 links到每个NVSwitch上，所以每个NVSwitch有 9 NVLinks / GPU x 8 GPUs = 72 links，正好对应72个端口。
+
+<img src="image/HGX B200.jpg" width="800">
+
+### GB200
+
+B200 (Blackwell GPU) 它是单一的 GPU 芯片，而GB200 `Grace Blackwell Superchip`是一个“超级芯片”组合。它通过 900GB/s 的 NVLink-C2C(CPU 与 GPU 极速直连) 高速接口，将`1 个英伟达 Grace CPU 和 2 个 B200 GPU`紧密地集成在同一块板卡上。
+
+优点：
+* 内存池化（Memory Pooling）：在 GB200 中，CPU 和 GPU 共享一个统一的内存地址空间。这意味着 GPU 可以直接“看到”并使用 CPU 的内存。CPU 和 GPU 之间没有通信障碍，内存完全共享，这让它在处理大模型时极其高效。
+* 消除瓶颈：传统的 B200 依赖 PCIe 接口与 CPU 通信，带宽较低。GB200 的 NVLink-C2C 带宽比 PCIe 5.0 高出 7 倍，消除了数据传输的卡顿。
+
+### NVL72
+
+在NVL72机架中，GB200 不是散放的，而是封装在计算托盘里，每个托盘包含2个GB200 模块。整个NVL72机架共有18个计算托盘，总计 36个CPU 和 72个GPU。
+
+机架内通常配有9个NVLink 交换机托盘，每个托盘包含2个Switch5.0交换机芯片，共计18个Switch5.0。
+
+<img src="image/NVL72.jpg" width="800">
+
+### Comparison
+
+| System               | Year | GPU Model      | GPU Interconnect | NVSwitch        | Bi-dir BW per GPU |
+|----------------------|------|----------------|------------------|-----------------|-------------------|
+| DGX A100 (Ampere)    | 2020 | 8x A100 (SXM4) | NVLink 3.0       | 6x NVSwitch 2.0 | 600 GB/s          |
+| DGX H100 (Hopper)    | 2022 | 8x H100 (SXM5) | NVLink 4.0       | 4x NVSwitch 3.0 | 900 GB/s          |
+| HGX B200 (Blackwell) | 2024 | 8x B200 (SXM)  | NVLink 5.0       | 2x NVSwitch 5.0 | 1.8 TB/s          |
 
 ## FAQ
 
