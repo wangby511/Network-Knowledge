@@ -38,6 +38,9 @@ OSPF路由器之间通过LSA（Link State Advertisement，链路状态公告）�
 * LSU (Link State Update) - 用于向对方**发送**所需的LSA
 * LSAck (Link State Acknowledgement)- 用于对收到的LSA进行确认
 
+* LSA（链路状态通告）
+* LSDB 链路状态数据库
+
 ### Hello定时器
 
 广播网络和点对点网络hello是10s。默认都是广播型网络，如以太网。
@@ -102,6 +105,12 @@ area 0.0.0.3
 * 区域边界路由器ABR - Area Border Router
 * 骨干路由器 - Backbone Router (主干区域0)
 * AS边界路由器ASBR - AS Boundary Router
+
+### 步骤
+
+1. 邻居发现
+2. 信息交换 
+3. 路由计算 - 最短路径优先算法
 
 ## 来源
 
